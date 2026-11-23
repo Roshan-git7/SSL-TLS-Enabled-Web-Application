@@ -1,0 +1,126 @@
+﻿{% extends "base.html" %}
+{% block title %}Security Information{% endblock %}
+{% block meta_desc %}Overview of security controls implemented in this web application.{% endblock %}
+
+{% block content %}
+<section class="content-section">
+  <div class="container">
+    <div class="content-header">
+      <h1 class="page-title">Security Information</h1>
+      <p class="page-subtitle">A transparent overview of security controls in this project. This is a student demonstration — see limitations below.</p>
+    </div>
+
+    <div class="notice notice-warning">&#x26A0; <strong>Development Notice:</strong> This application uses a <strong>self-signed TLS certificate</strong>. Browsers will display a trust warning. This is expected for local development and does NOT indicate the same guarantees as a CA-issued certificate.</div>
+
+    <div class="sec-section">
+      <h2 class="sec-section-title">&#x1F512; TLS / HTTPS Encryption</h2>
+      <div class="sec-cards">
+        <div class="sec-card sec-card-active">
+          <h3>Implemented</h3>
+          <ul>
+            <li>Flask serves traffic over TLS on <code>https://127.0.0.1:5000</code></li>
+            <li>HTTP listener on port 5001 issues a 302 redirect to HTTPS — path is preserved</li>
+            <li>Redirect target is always the fixed local origin — no open-redirect vulnerability</li>
+            <li>HSTS header sent on HTTPS responses (<code>max-age=31536000; includeSubDomains</code>)</li>
+          </ul>
+        </div>
+        <div class="sec-card sec-card-dev">
+          <h3>Development Limitations</h3>
+          <ul>
+            <li>Certificate is self-signed (not CA-issued) — browser shows trust warning</li>
+            <li>TLS hides application data, not connection metadata (IP, timing)</li>
+            <li>HSTS is only effective after the user accepts the self-signed cert in the browser</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-section">
+      <h2 class="sec-section-title">&#x1F511; Authentication &amp; Password Security</h2>
+      <div class="sec-cards">
+        <div class="sec-card sec-card-active">
+          <h3>Implemented</h3>
+          <ul>
+            <li>Werkzeug <code>generate_password_hash</code> — PBKDF2-SHA256 or Scrypt, never plaintext</li>
+            <li>Login uses <code>check_password_hash</code> (timing-safe comparison)</li>
+            <li>Generic "Invalid username or password" message — prevents username enumeration</li>
+            <li><code>session.clear()</code> called before login — prevents session-fixation attack</li>
+            <li>Logout uses POST + CSRF token; session fully cleared on sign-out</li>
+            <li>Server-side validation: length, character set, password match</li>
+          </ul>
+        </div>
+        <div class="sec-card sec-card-dev">
+          <h3>Out of Scope</h3>
+          <ul>
+            <li>Rate-limiting and brute-force lockout (not implemented)</li>
+            <li>Multi-factor authentication (MFA)</li>
+            <li>Password reset / forgot-password flow</li>
+            <li>Account lockout after repeated failures</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-section">
+      <h2 class="sec-section-title">&#x1F6E1;&#xFE0F; CSRF Protection</h2>
+      <div class="sec-cards">
+        <div class="sec-card sec-card-active">
+          <h3>Implemented</h3>
+          <ul>
+            <li>Flask-WTF <code>CSRFProtect</code> applied to all POST forms (register, login, logout)</li>
+            <li>Tokens are time-limited (1 hour) and validated server-side on every submission</li>
+            <li>Expired or invalid tokens produce a user-friendly flash message and safe redirect</li>
+            <li>Logout route is POST-only — prevents CSRF-driven forced logout via GET link</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-section">
+      <h2 class="sec-section-title">&#x1F4CB; HTTP Security Headers</h2>
+      <div class="headers-table-wrapper">
+        <table class="headers-table">
+          <thead><tr><th>Header</th><th>Value (summary)</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Content-Security-Policy</td><td class="mono">default-src 'self'; ...</td><td>Restricts resource origins, mitigates XSS</td></tr>
+            <tr><td class="mono">Strict-Transport-Security</td><td class="mono">max-age=31536000 (HTTPS only)</td><td>Tells browser to always use HTTPS</td></tr>
+            <tr><td class="mono">X-Frame-Options</td><td class="mono">DENY</td><td>Prevents clickjacking attacks</td></tr>
+            <tr><td class="mono">X-Content-Type-Options</td><td class="mono">nosniff</td><td>Prevents MIME-type sniffing</td></tr>
+            <tr><td class="mono">Referrer-Policy</td><td class="mono">strict-origin-when-cross-origin</td><td>Limits referrer information leakage</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec-section">
+      <h2 class="sec-section-title">&#x1F36A; Session Cookie Attributes</h2>
+      <table class="headers-table">
+        <thead><tr><th>Attribute</th><th>Value</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>HttpOnly</td><td>True</td><td>JavaScript cannot read the cookie — prevents XSS-based theft</td></tr>
+          <tr><td>Secure</td><td>True</td><td>Cookie is only transmitted over HTTPS</td></tr>
+          <tr><td>SameSite</td><td>Lax</td><td>Mitigates CSRF on cross-site navigations</td></tr>
+          <tr><td>Lifetime</td><td>1 hour</td><td>Short-lived session reduces the exposure window</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec-section">
+      <h2 class="sec-section-title">&#x1F5C4;&#xFE0F; Database Security</h2>
+      <div class="sec-cards">
+        <div class="sec-card sec-card-active">
+          <h3>Implemented</h3>
+          <ul>
+            <li>All SQL queries use parameterized statements — SQL injection prevented by design</li>
+            <li>Only <code>id</code>, <code>username</code>, <code>password_hash</code>, and <code>created_at</code> are stored</li>
+            <li>No default admin account or test credentials seeded in the database</li>
+            <li>SQLite WAL mode and foreign-key enforcement enabled</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice notice-info">&#x2139; <strong>Disclaimer:</strong> This application is a student learning project demonstrating key web-security concepts. It is <strong>not production-ready</strong>. Missing controls include rate-limiting, account lockout, CA-signed TLS, and a formal security audit.</div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,71 @@
+﻿{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block meta_desc %}Demonstration of HTTPS/TLS, session auth, CSRF, and web security best practices.{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      B.Tech CSE &middot; 5th Semester &middot; Cyber Security
+    </div>
+    <h1 class="hero-title">
+      SSL/TLS-Enabled<br>
+      <span class="gradient-text">Secure Web Application</span>
+    </h1>
+    <p class="hero-subtitle">
+      Demonstrating HTTPS encryption, session-based authentication, CSRF protection,
+      Werkzeug password hashing, and modern web security headers.
+    </p>
+    <div class="hero-actions">
+      {% if session.get('user_id') %}
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg" id="heroGoToDash">Go to Dashboard</a>
+      <a href="{{ url_for('security') }}" class="btn btn-outline btn-lg" id="heroSecInfo">Security Info</a>
+      {% else %}
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg" id="heroRegisterBtn">Get Started</a>
+      <a href="{{ url_for('login') }}"    class="btn btn-outline btn-lg"  id="heroLoginBtn">Sign In</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hero-visual" aria-hidden="true">
+    <div class="shield-wrap">
+      <div class="shield-outer">
+        <div class="shield-inner">
+          <span class="shield-icon">&#x1F510;</span>
+        </div>
+      </div>
+      <div class="orbit orbit-1"><span class="orbit-dot"></span></div>
+      <div class="orbit orbit-2"><span class="orbit-dot"></span></div>
+      <div class="orbit orbit-3"><span class="orbit-dot"></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="features" aria-labelledby="featuresHeading">
+  <div class="container">
+    <h2 id="featuresHeading" class="section-title">Security Features Demonstrated</h2>
+    <div class="features-grid">
+      <article class="feature-card"><div class="feature-icon">&#x1F512;</div><h3>HTTPS / TLS</h3><p>All traffic encrypted using TLS. HTTP on port 5001 auto-redirects to HTTPS on port 5000.</p></article>
+      <article class="feature-card"><div class="feature-icon">&#x1F6E1;&#xFE0F;</div><h3>CSRF Protection</h3><p>Every state-changing form is guarded by a time-limited CSRF token via Flask-WTF.</p></article>
+      <article class="feature-card"><div class="feature-icon">&#x1F511;</div><h3>Password Hashing</h3><p>Werkzeug PBKDF2/Scrypt hashing. Plaintext passwords are never stored in the database.</p></article>
+      <article class="feature-card"><div class="feature-icon">&#x1F36A;</div><h3>Secure Sessions</h3><p>HttpOnly, Secure, SameSite=Lax session cookies prevent XSS theft and CSRF attacks.</p></article>
+      <article class="feature-card"><div class="feature-icon">&#x1F4CB;</div><h3>Security Headers</h3><p>CSP, HSTS, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy on every response.</p></article>
+      <article class="feature-card"><div class="feature-icon">&#x1F5C4;&#xFE0F;</div><h3>Safe Queries</h3><p>SQLite parameterized queries on all database operations — SQL injection prevented by design.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="tech-stack" aria-labelledby="techHeading">
+  <div class="container">
+    <h2 id="techHeading" class="section-title">Technology Stack</h2>
+    <div class="tech-grid">
+      <div class="tech-item"><span class="tech-label">Backend</span><span class="tech-value">Python 3 + Flask</span></div>
+      <div class="tech-item"><span class="tech-label">Database</span><span class="tech-value">SQLite 3</span></div>
+      <div class="tech-item"><span class="tech-label">Auth</span><span class="tech-value">Werkzeug + Flask Sessions</span></div>
+      <div class="tech-item"><span class="tech-label">CSRF</span><span class="tech-value">Flask-WTF</span></div>
+      <div class="tech-item"><span class="tech-label">TLS</span><span class="tech-value">Python ssl module</span></div>
+      <div class="tech-item"><span class="tech-label">Frontend</span><span class="tech-value">HTML5 + CSS3 + Vanilla JS</span></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,73 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block meta_desc %}Your secure dashboard — account info and active security controls.{% endblock %}
+
+{% block content %}
+<section class="dashboard-section">
+  <div class="container">
+    <div class="dashboard-header">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Welcome back, <strong>{{ user.username }}</strong></p>
+    </div>
+    <div class="dashboard-grid">
+
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <span class="dash-card-icon">&#x1F464;</span>
+          <h2 class="dash-card-title">Account Information</h2>
+        </div>
+        <div class="info-list">
+          <div class="info-item"><span class="info-label">User ID</span><span class="info-value mono">#{{ user.id }}</span></div>
+          <div class="info-item"><span class="info-label">Username</span><span class="info-value">{{ user.username }}</span></div>
+          <div class="info-item"><span class="info-label">Member Since</span><span class="info-value mono">{{ user.created_at }}</span></div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <span class="dash-card-icon">&#x1F512;</span>
+          <h2 class="dash-card-title">Connection Security</h2>
+        </div>
+        <div class="security-status">
+          {% if is_https %}
+          <div class="status-badge status-secure"><span class="status-dot"></span><span>HTTPS &mdash; Encrypted</span></div>
+          <p class="status-desc">Connection is encrypted with TLS. Data in transit is protected.</p>
+          {% else %}
+          <div class="status-badge status-insecure"><span class="status-dot"></span><span>HTTP &mdash; Unencrypted</span></div>
+          <p class="status-desc">&#x26A0; Unencrypted. Use <a href="https://127.0.0.1:5000/dashboard">HTTPS on port 5000</a>.</p>
+          {% endif %}
+        </div>
+        <div class="info-list">
+          <div class="info-item"><span class="info-label">Protocol</span><span class="info-value mono">{{ 'TLS / HTTPS' if is_https else 'HTTP (plaintext)' }}</span></div>
+          <div class="info-item"><span class="info-label">Cookie Flags</span><span class="info-value mono">HttpOnly; Secure; SameSite=Lax</span></div>
+          <div class="info-item"><span class="info-label">Session Lifetime</span><span class="info-value mono">1 hour</span></div>
+        </div>
+      </div>
+
+      <div class="dash-card dash-card-wide">
+        <div class="dash-card-header">
+          <span class="dash-card-icon">&#x1F6E1;&#xFE0F;</span>
+          <h2 class="dash-card-title">Active Security Controls</h2>
+        </div>
+        <div class="controls-grid">
+          <div class="control-item control-active"><span class="control-check">&#x2713;</span><div><strong>CSRF Protection</strong><p>Flask-WTF tokens on all POST forms</p></div></div>
+          <div class="control-item control-active"><span class="control-check">&#x2713;</span><div><strong>Password Hashing</strong><p>Werkzeug PBKDF2 / Scrypt — no plaintext</p></div></div>
+          <div class="control-item control-active"><span class="control-check">&#x2713;</span><div><strong>SQL Injection Prevention</strong><p>Parameterized queries only</p></div></div>
+          <div class="control-item control-active"><span class="control-check">&#x2713;</span><div><strong>Security Headers</strong><p>CSP, HSTS*, X-Frame-Options, nosniff</p></div></div>
+          <div class="control-item control-active"><span class="control-check">&#x2713;</span><div><strong>Session Fixation Prevention</strong><p>session.clear() on each login</p></div></div>
+          <div class="control-item control-active"><span class="control-check">&#x2713;</span><div><strong>Input Validation</strong><p>Server-side length &amp; character checks</p></div></div>
+        </div>
+        <p class="controls-note">* HSTS is only sent on HTTPS responses, as required by the specification.</p>
+      </div>
+
+    </div>
+    <div class="dashboard-actions">
+      <a href="{{ url_for('security') }}" class="btn btn-outline" id="viewSecurityBtn">View Security Info</a>
+      <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger" id="dashLogoutBtn">Sign Out</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
